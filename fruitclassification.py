@@ -227,10 +227,10 @@ print("Classes:", class_names)
 
 data_augmentation = keras.Sequential([
     layers.RandomFlip("horizontal"),
+    layers.RandomFlip("vertical"),
     layers.RandomRotation(0.1),
     layers.RandomZoom(0.1),
-    layers.Cropping2D(cropping=((10, 10), (10, 10))),
-    layers.Resizing(224, 224)
+    layers.Cropping2D(cropping=((10, 10), (10, 10)))
 ])
 
 """# Model Architecture & Training"""
@@ -266,7 +266,19 @@ def build_model(input_shape=(455,320,3), num_classes=10):
     x = layers.ReLU()(x)
     x = layers.MaxPooling2D()(x)
 
+    x = layers.Conv2D(512, (3,3), padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+    x = layers.MaxPooling2D()(x)
+
+    x = layers.Conv2D(1024, (3,3), padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+    x = layers.MaxPooling2D()(x)
+
     x = layers.GlobalAveragePooling2D()(x)
+    x = layers.Dropout(0.25)(x)
+
 
     outputs = layers.Dense(num_classes, activation='softmax')(x)
 
@@ -326,3 +338,5 @@ plt.legend()
 plt.title("Loss")
 
 plt.show()
+
+model.save("fruit_classifier.keras")
